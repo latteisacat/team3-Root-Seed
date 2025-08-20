@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>SecAgent Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>SecAgent Dashboard</h1>
+  <form action="/web/new_job" method="post" class="card">
+    <label>Target URL</label>
+    <input name="target" placeholder="https://example.com" value="{{ default_target }}">
+    <label>Controls (comma)</label>
+    <input name="controls" placeholder="U31">
+    <button type="submit">New Job</button>
+  </form>
+
+  <h2>Recent Jobs</h2>
+  <table>
+    <thead><tr><th>ID</th><th>Target</th><th>Status</th><th>Progress</th><th>Created</th></tr></thead>
+    <tbody>
+      {% for j in jobs %}
+      <tr>
+        <td><a href="/jobs/{{ j.id }}">{{ j.id }}</a></td>
+        <td>{{ j.target }}</td>
+        <td>{{ j.status }}</td>
+        <td>{{ j.progress }}%</td>
+        <td>{{ j.created_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

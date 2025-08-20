@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Job {{ job.id }}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <a href="/">&larr; Back</a>
+  <h1>Job #{{ job.id }}</h1>
+  <div class="grid">
+    <div class="col">
+      <h3>Meta</h3>
+      <ul>
+        <li><b>Target:</b> {{ job.target }}</li>
+        <li><b>Status:</b> <span id="status">{{ job.status }}</span></li>
+        <li><b>Progress:</b> <span id="progress">{{ job.progress }}</span>%</li>
+        <li><b>Controls:</b> {{ job.controls }}</li>
+      </ul>
+      <a class="btn" href="/api/jobs/{{ job.id }}/report.json" target="_blank">Download JSON Report</a>
+    </div>
+    <div class="col">
+      <h3>Live Logs</h3>
+      <pre id="logs" class="log"></pre>
+    <a class="btn" href="/api/jobs/{{ job.id }}/report.pdf" target="_blank">Download PDF</a>
+      <script>
+        const evt = new EventSource("/api/jobs/{{ job.id }}/stream");
+        evt.onmessage = (e) => {
+          const data = JSON.parse(e.data);
+          const logs = document.getElementById("logs");
+          logs.textContent += `[${data.ts}] ${data.level.toUpperCase()} ${data.message}\n`;
+          logs.scrollTop = logs.scrollHeight;
+        };
+        evt.addEventListener("stage", (e) => {
+          const d = JSON.parse(e.data);
+          document.getElementById("status").textContent = d.message;
+        });
+        evt.addEventListener("done", (e) => {
+          const d = JSON.parse(e.data);
+          document.getElementById("status").textContent = "DONE";
+          document.getElementById("progress").textContent = "100";
+        });
+        evt.addEventListener("error", (e) => {
+          document.getElementById("status").textContent = "FAILED";
+        });
+      </script>
+    </div>
+  </div>
+
+  <h3>Findings</h3>
+  <table>
+    <thead><tr><th>Control</th><th>Status</th><th>Finding</th><th>Recommendation</th></tr></thead>
+    <tbody>
+      {% for f in findings %}
+      <tr>
+        <td>{{ f.control_id }}</td>
+        <td>{{ f.status }}</td>
+        <td>{{ f.finding }}</td>
+        <td>{{ f.recommendation }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3>Artifacts</h3>
+  <table>
+    <thead><tr><th>ID</th><th>Type</th><th>SHA256</th><th>Meta</th></tr></thead>
+    <tbody>
+      {% for a in artifacts %}
+      <tr>
+        <td>{{ a.id }}</td>
+        <td>{{ a.type }}</td>
+        <td><code>{{ a.sha256 }}</code></td>
+        <td><pre>{{ a.meta_json | tojson(indent=2) }}</pre></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

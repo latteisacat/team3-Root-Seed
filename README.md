@@ -74,3 +74,77 @@ RAG (Retrieval-Augmented Generation 검색 증강 생성) 활용.
   ```
 
 ---
+
+# MCP-RAG Agent Minimal (Ubuntu + Python + Flask)
+
+A minimal, self-contained example showing how to:
+- Create and monitor security checks via a **Flask** web UI
+- Run jobs asynchronously with **RQ + Redis**
+- Call "MCP-like" tools (`http_check`, `ssh_exec`, `mariadb_query` stubs)
+- Store events, artifacts, and findings into **SQLite**
+- Stream job logs with **SSE**
+- Include a demo control **U31 (HSTS header)** for web servers
+
+> This is a teaching/demo skeleton. Harden and adapt before production.
+
+## Requirements (Ubuntu)
+
+```bash
+sudo apt update
+sudo apt install -y python3-pip python3-venv redis-server
+```
+
+## Setup
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+export FLASK_APP=app.py
+# (Optional) set envs
+# export REDIS_URL=redis://localhost:6379/0
+# export AGENT_DRY_RUN=true      # skip real SSH/DB calls
+# export DEMO_TARGET=https://example.com
+flask db_init
+redis-server --daemonize yes  # or run it as a service
+rq worker jobs &
+flask run
+```
+
+Open http://127.0.0.1:5000/
+
+## Quick Demo
+
+1. Click **New Job** on the dashboard.
+2. Use target from `DEMO_TARGET` or input e.g. `https://example.com`.
+3. Add control `U31` (HSTS check).
+4. Watch live logs and the final finding; download report JSON.
+
+## Notes
+- `ssh_exec` and `mariadb_query` are **safe stubs** by default. Set `AGENT_DRY_RUN=false` to enable real operations.
+- For SSH, configure credentials in `config.py` or via environment variables.
+- For MariaDB, ensure reachable DB and read-only credentials.
+
+## Project Layout
+
+```
+mcp_rag_agent_minimal/
+├─ app.py                # Flask routes + SSE + job endpoints
+├─ agent.py              # Orchestrates: RAG stub → plan → MCP calls → decide
+├─ mcp_bridge.py         # http_check / ssh_exec / mariadb_query (stubs/real)
+├─ models.py             # SQLAlchemy models
+├─ config.py             # Settings
+├─ worker.py             # RQ worker entry
+├─ templates/
+│  ├─ dashboard.html
+│  └─ job.html
+├─ static/
+│  └─ style.css
+├─ requirements.txt
+└─ README.md
+```
+
+## Security
+- Keep **read-only** first. Never run destructive commands.
+- Store secrets in a vault (not provided here). This demo uses env variables.
+- Review CSP/HSTS for the Flask app if exposed beyond localhost.
