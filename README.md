@@ -1,5 +1,3 @@
-# team3-Root-Seed
-
 ## AI를 활용한 취약점 분석 자동화 도구.
 
 RAG (Retrieval-Augmented Generation 검색 증강 생성) 활용.
@@ -8,6 +6,12 @@ RAG (Retrieval-Augmented Generation 검색 증강 생성) 활용.
 
 
 Ex) 
+
+* 사용자가 “U31 점검해”라고 하면,
+* **RAG**가 U31에 해당하는 점검 지식(무엇을 확인해야 하는지)을 찾아주고,
+* **LLM**이 그 지식을 토대로 “어떤 MCP 툴을 호출할지” 스스로 정한 뒤,
+* **MCP**가 실제 서버에 접속해 데이터를 가져오고,
+* 다시 **LLM**이 기준과 증거를 맞춰 판정·리포트를 작성합니다.
 
 ---
 
