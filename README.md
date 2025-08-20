@@ -5,7 +5,7 @@ RAG (Retrieval-Augmented Generation 검색 증강 생성) 활용.
 해당 Prompt 를 바탕으로 MCP 연결 → 원하는 정보 도출. 
 
 
-Ex) 
+### 프로그램 동작 예시 
 
 * 사용자가 “U31 점검해”라고 하면,
 * **RAG**가 U31에 해당하는 점검 지식(무엇을 확인해야 하는지)을 찾아주고,
